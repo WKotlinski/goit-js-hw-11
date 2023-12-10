@@ -58,10 +58,10 @@ function searchImages(query, page = 1) {
           lightbox.refresh();
         }
         if (data.totalHits <= page * pageLimit) {
-          moreBtn.style.display = 'none';
           Notiflix.Notify.info(
             "We're sorry, but you've reached the end of search results."
           );
+          moreBtn.style.display = 'none';
         } else {
           moreBtn.style.display = 'block';
         }
@@ -74,9 +74,6 @@ function searchImages(query, page = 1) {
     .catch(error => {
       console.error('Error fetching data:', error);
       Notiflix.Report.failure('Error fetching data');
-    })
-    .finally(_event => {
-      moreBtn.style.display = 'block';
     });
 }
 
