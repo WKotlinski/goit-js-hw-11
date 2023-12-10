@@ -1,6 +1,8 @@
 import axios from 'axios';
 import Notify from 'notiflix';
 import SimpleLightbox from 'simplelightbox';
+import 'simplelightbox/dist/simple-lightbox.min.css';
+
 const form = document.querySelector('#search-form');
 const input = document.querySelector('input[name="searchQuery"]');
 const placeForImg = document.querySelector('.gallery');
@@ -9,8 +11,10 @@ const apiKey = '41167232-e4ed0bcecad469809d9012c23';
 let currentPage = 1;
 let searchingValue = '';
 let pageLimit = 5;
+
 function searchImages(query, page = 1) {
   const apiUrl = `https://pixabay.com/api/?key=${apiKey}&q=${query}&image_type=photo&orientation=horizontal&safesearch=true&page=${page}&per_page=${pageLimit}`;
+
   return axios
     .get(apiUrl)
     .then(res => {
@@ -46,7 +50,12 @@ function searchImages(query, page = 1) {
         </div>`;
           }
         );
-        placeForImg.innerHTML = html.join('');
+        if (page === 1) {
+          placeForImg.innerHTML = html.join('');
+        } else {
+          placeForImg.innerHTML += html.join('');
+        }
+        const lightbox = new SimpleLightbox('.gallery a');
       } else {
         Notify.failure(
           'Sorry, there are no images matching your search query. Please try again.'
@@ -56,6 +65,9 @@ function searchImages(query, page = 1) {
     .catch(error => {
       console.error('Error fetching data:', error);
       Notify.failure('Error fetching data');
+    })
+    .finally(_event => {
+      moreBtn.style.display = 'block';
     });
 }
 
@@ -65,14 +77,9 @@ form.addEventListener('submit', ev => {
   searchingValue = input.value;
   currentPage = 1;
   searchImages(searchingValue, currentPage);
-  moreBtn.style.display = 'block';
 });
 moreBtn.addEventListener('click', () => {
+  moreBtn.style.display = 'none';
   currentPage++;
   searchImages(searchingValue, currentPage);
-});
-new SimpleLightbox('.gallery a', {
-  captions: true,
-  captionsData: 'alt',
-  captionDelay: 250,
 });
