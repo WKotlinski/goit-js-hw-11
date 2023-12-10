@@ -1,5 +1,5 @@
 import axios from 'axios';
-import Notify from 'notiflix';
+import Notiflix from 'notiflix';
 import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
 
@@ -10,11 +10,11 @@ const moreBtn = document.querySelector('.load-more');
 const apiKey = '41167232-e4ed0bcecad469809d9012c23';
 let currentPage = 1;
 let searchingValue = '';
-let pageLimit = 5;
+let pageLimit = 40;
+let lightbox;
 
 function searchImages(query, page = 1) {
   const apiUrl = `https://pixabay.com/api/?key=${apiKey}&q=${query}&image_type=photo&orientation=horizontal&safesearch=true&page=${page}&per_page=${pageLimit}`;
-
   return axios
     .get(apiUrl)
     .then(res => {
@@ -52,19 +52,28 @@ function searchImages(query, page = 1) {
         );
         if (page === 1) {
           placeForImg.innerHTML = html.join('');
+          creatingLightbox();
         } else {
           placeForImg.innerHTML += html.join('');
+          lightbox.refresh();
         }
-        const lightbox = new SimpleLightbox('.gallery a');
+        if (data.totalHits <= page * pageLimit) {
+          moreBtn.style.display = 'none';
+          Notiflix.Notify.info(
+            "We're sorry, but you've reached the end of search results."
+          );
+        } else {
+          moreBtn.style.display = 'block';
+        }
       } else {
-        Notify.failure(
+        Notiflix.Notify.failure(
           'Sorry, there are no images matching your search query. Please try again.'
         );
       }
     })
     .catch(error => {
       console.error('Error fetching data:', error);
-      Notify.failure('Error fetching data');
+      Notiflix.Report.failure('Error fetching data');
     })
     .finally(_event => {
       moreBtn.style.display = 'block';
@@ -83,3 +92,11 @@ moreBtn.addEventListener('click', () => {
   currentPage++;
   searchImages(searchingValue, currentPage);
 });
+
+function creatingLightbox() {
+  lightbox = new SimpleLightbox('.gallery a', {
+    captions: true,
+    captionsData: 'alt',
+    captionDelay: 250,
+  });
+}
